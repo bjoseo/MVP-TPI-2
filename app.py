@@ -20,7 +20,7 @@ print(f"Cargando modelos en {DEVICE} ({DTYPE})...")
 # Modelo de Difusión: Opera en el espacio latente para duplicar (x2) la resolución.
 upscaler = StableDiffusionLatentUpscalePipeline.from_pretrained(
     MODEL_DIFFUSION_ID,
-    torch_dtype=DTYPE,
+    dtype=DTYPE,
 )
 upscaler.to(DEVICE)
 
@@ -45,7 +45,7 @@ ETIQUETAS_CLIP = [
 # ==============================================================================
 # 2. FUNCIONES DE PROCESAMIENTO DIGITAL Y ANÁLISIS
 # ==============================================================================
-def preparar_imagen_entrada(imagen: Image.Image, max_lado: int = 256) -> Image.Image:
+def preparar_imagen_entrada_old(imagen: Image.Image, max_lado: int = 256) -> Image.Image:
     """
     Limita el tamaño de entrada a 256px en su lado mayor y asegura dimensiones
     múltiplos de 8 (requisito matemático de los autoencoders del espacio latente).
@@ -62,6 +62,33 @@ def preparar_imagen_entrada(imagen: Image.Image, max_lado: int = 256) -> Image.I
     # Ajuste a múltiplo de 8 para compatibilidad con el espacio latente del VAE
     ancho = max(64, (ancho // 8) * 8)
     alto = max(64, (alto // 8) * 8)
+    return imagen.resize((ancho, alto), Image.Resampling.LANCZOS)
+
+# ==============================================================================
+# 2. FUNCIONES DE PROCESAMIENTO DIGITAL Y ANÁLISIS
+# ==============================================================================
+#    Se recomienda usar preparar_imagen_entrada (con múltiplos de 16) para evitar errores de #  skip-connections en la U-Net.
+#    Se deja preparar_imagen_entrada_old como referencia histórica de la versión inicial.
+#    Se cambiá el divisor 8 por 16 en preparar_imagen_entrada para asegurar compatibilidad con los 4 niveles de downsampling de la U-Net.
+# ==============================================================================
+
+# 2. En preparar_imagen_entrada (línea ~49), cambiá el divisor 8 por 16:
+def preparar_imagen_entrada(imagen: Image.Image, max_lado: int = 256) -> Image.Image:
+    """
+    Limita el tamaño de entrada a 256px en su lado mayor y asegura dimensiones
+    múltiplos de 16 (requisito de los 4 niveles de downsampling de la U-Net).
+    """
+    imagen = imagen.convert("RGB")
+    ancho, alto = imagen.size
+
+    if max(ancho, alto) > max_lado:
+        escala = max_lado / max(ancho, alto)
+        ancho = int(ancho * escala)
+        alto = int(alto * escala)
+
+    # Ajuste a múltiplo de 16 para que las skip-connections de la U-Net coincidan
+    ancho = max(64, (ancho // 16) * 16)
+    alto = max(64, (alto // 16) * 16)
     return imagen.resize((ancho, alto), Image.Resampling.LANCZOS)
 
 
