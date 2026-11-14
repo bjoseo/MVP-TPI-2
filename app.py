@@ -282,6 +282,19 @@ with gr.Blocks(title="MVP Imagen Digital — Super-Resolución Crítica") as dem
         outputs=[slider_comparador, img_diferencias, reporte_md],
     )
 
+    # Ejemplos precargados desde la carpeta examples/ del repositorio
+    gr.Examples(
+        examples=[
+            ["examples/img_01.png", "archival photograph, clear street sign text, sharp details", 20, 42, 5.0],
+            ["examples/img_02.png", "chalkboard menu sign with clear handwritten text, sharp details", 20, 42, 5.0],
+            ["examples/img_03.png", "close-up of a printed QR code and label text, sharp details", 20, 42, 5.0],
+            ["examples/img_04.png", "vintage building facade with architectural details, sharp focus", 20, 42, 5.0],
+            ["examples/img_05.png", "human face portrait in archival photo, natural skin texture", 20, 42, 5.0],
+        ],
+        inputs=[input_img, prompt_txt, steps_slider, seed_number, guidance_slider],
+        label="O elegí una imagen de ejemplo incluida en el repositorio:",
+    )
+
 if __name__ == "__main__":
     # share=True genera un enlace público temporal gratuito indispensable para Google Colab
     demo.launch(share=True)
