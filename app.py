@@ -45,7 +45,7 @@ ETIQUETAS_CLIP = [
 # ==============================================================================
 # 2. FUNCIONES DE PROCESAMIENTO DIGITAL Y ANÁLISIS
 # ==============================================================================
-def preparar_imagen_entrada_old(imagen: Image.Image, max_lado: int = 256) -> Image.Image:
+def preparar_imagen_entrada_old_01(imagen: Image.Image, max_lado: int = 256) -> Image.Image:
     """
     Limita el tamaño de entrada a 256px en su lado mayor y asegura dimensiones
     múltiplos de 8 (requisito matemático de los autoencoders del espacio latente).
@@ -73,7 +73,7 @@ def preparar_imagen_entrada_old(imagen: Image.Image, max_lado: int = 256) -> Ima
 # ==============================================================================
 
 # 2. En preparar_imagen_entrada (línea ~49), cambiá el divisor 8 por 16:
-def preparar_imagen_entrada(imagen: Image.Image, max_lado: int = 256) -> Image.Image:
+def preparar_imagen_entrada_old_02(imagen: Image.Image, max_lado: int = 256) -> Image.Image:
     """
     Limita el tamaño de entrada a 256px en su lado mayor y asegura dimensiones
     múltiplos de 16 (requisito de los 4 niveles de downsampling de la U-Net).
@@ -90,6 +90,33 @@ def preparar_imagen_entrada(imagen: Image.Image, max_lado: int = 256) -> Image.I
     ancho = max(64, (ancho // 16) * 16)
     alto = max(64, (alto // 16) * 16)
     return imagen.resize((ancho, alto), Image.Resampling.LANCZOS)
+
+# ==============================================================================
+# 2. FUNCIONES DE PROCESAMIENTO DIGITAL Y ANÁLISIS
+# ==============================================================================
+def preparar_imagen_entrada(imagen: Image.Image, tamano_objetivo: int = 256) -> Image.Image:
+    """
+    Escala la imagen manteniendo su relación de aspecto para que el lado mayor
+    mida 256px y completa con relleno neutro (padding) hasta 256x256.
+    Esto garantiza divisibilidad exacta por 128 (VAE x8 * U-Net x16) sin deformar
+    ni recortar información de la escena.
+    """
+    imagen = imagen.convert("RGB")
+    ancho, alto = imagen.size
+
+    # Escalamos proporcionalmente para que el lado mayor sea tamano_objetivo (256)
+    escala = tamano_objetivo / max(ancho, alto)
+    nuevo_ancho = max(1, int(round(ancho * escala)))
+    nuevo_alto = max(1, int(round(alto * escala)))
+    img_redimensionada = imagen.resize((nuevo_ancho, nuevo_alto), Image.Resampling.LANCZOS)
+
+    # Creamos un lienzo cuadrado exacto (256x256) y centramos la imagen
+    lienzo = Image.new("RGB", (tamano_objetivo, tamano_objetivo), (128, 128, 128))
+    offset_x = (tamano_objetivo - nuevo_ancho) // 2
+    offset_y = (tamano_objetivo - nuevo_alto) // 2
+    lienzo.paste(img_redimensionada, (offset_x, offset_y))
+
+    return lienzo
 
 
 def analizar_con_clip(imagen: Image.Image) -> dict[str, float]:
