@@ -159,7 +159,7 @@ def ejecutar_pipeline(
         raise gr.Error("Por favor, subí una imagen antes de ejecutar el análisis.")
 
     # 1. Preprocesamiento: aseguramos dimensiones seguras para espacio latente
-    img_base = preparar_imagen_entrada(imagen_entrada, max_lado=256)
+    img_base = preparar_imagen_entrada(imagen_entrada, tamano_objetivo=256)
     ancho_final, alto_final = img_base.width * 2, img_base.height * 2
 
     # 2. Línea base clásica (Interpolación Bicúbica):
