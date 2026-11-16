@@ -7,7 +7,7 @@ from PIL import Image, ImageChops, ImageEnhance
 
 ADVERTENCIA_TRANSPARENCIA = """
 > ⚠️ **ADVERTENCIA DE RECONSTRUCCIÓN POR INTELIGENCIA ARTIFICIAL:**
-> Este sistema aplica **super-resolución mediante difusión latente**. Los detalles finos (caracteres tipográficos, números, códigos QR, rostros o texturas) que no eran legibles en la miniatura original **son estimaciones generativas plausibles, NO información recuperada del documento real**. No utilice el resultado como prueba documental, pericial o histórica sin verificación independiente.
+> Este sistema aplica **super-resolución mediante difusión latente**. Los detalles finos que no eran legibles en la miniatura original **son estimaciones generativas plausibles, NO información recuperada del documento real**. No utilice el resultado como prueba documental o histórica sin verificación independiente.
 """
 
 
